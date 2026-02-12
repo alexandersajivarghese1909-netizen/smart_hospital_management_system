@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy Management - Smart HMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 30px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            padding: 12px 30px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .search-box {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            width: 300px;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f5f5f5;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .stock-low {
+            color: #d32f2f;
+            font-weight: 600;
+        }
+
+        .stock-ok {
+            color: #388e3c;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            margin: 50px auto;
+            border-radius: 12px;
+            padding: 30px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .sale-item {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .remove-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .total-section {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .total-amount {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>💊 Pharmacy Management</h1>
+        <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('inventory')">📦 Inventory</button>
+            <button class="tab" onclick="switchTab('sales')">💰 Sales</button>
+        </div>
+
+        <!-- Inventory Tab -->
+        <div id="inventory" class="tab-content active">
+            <div class="action-bar">
+                <input type="text" class="search-box" id="searchInventory" placeholder="Search medicines...">
+                <button class="add-btn" onclick="openAddMedicineModal()">+ Add Medicine</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Medicine Name</th>
+                            <th>Category</th>
+                            <th>Manufacturer</th>
+                            <th>Price (₹)</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody">
+                        <!-- Will be populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sales Tab -->
+        <div id="sales" class="tab-content">
+            <div class="action-bar">
+                <h2>Create New Sale</h2>
+                <button class="add-btn" onclick="openSaleModal()">+ New Sale</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Medicine Modal -->
+    <div id="addMedicineModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Medicine</h2>
+                <button class="close-btn" onclick="closeAddMedicineModal()">&times;</button>
+            </div>
+            <form id="addMedicineForm">
+                <div class="form-group">
+                    <label>Medicine Name *</label>
+                    <input type="text" name="medicine_name" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Category</label>
+                        <input type="text" name="category" placeholder="e.g., Antibiotic">
+                    </div>
+                    <div class="form-group">
+                        <label>Manufacturer</label>
+                        <input type="text" name="manufacturer">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price (₹) *</label>
+                        <input type="number" name="price" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Stock Quantity *</label>
+                        <input type="number" name="stock_quantity" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Reorder Level</label>
+                        <input type="number" name="reorder_level" value="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Expiry Date</label>
+                        <input type="date" name="expiry_date">
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Add Medicine</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sale Modal -->
+    <div id="saleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create Sale</h2>
+                <button class="close-btn" onclick="closeSaleModal()">&times;</button>
+            </div>
+            <form id="saleForm">
+                <div class="form-group">
+                    <label>Patient ID *</label>
+                    <input type="text" name="patient_id" id="salePatientId" required placeholder="Enter Patient ID">
+                </div>
+
+                <div class="form-group">
+                    <label>Select Medicine *</label>
+                    <select id="medicineSelect">
+                        <option value="">-- Select Medicine --</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Quantity *</label>
+                        <input type="number" id="medicineQuantity" min="1" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label></label>
+                        <button type="button" class="add-btn" onclick="addSaleItem()" style="margin-top: 24px;">Add to Bill</button>
+                    </div>
+                </div>
+
+                <div id="saleItems"></div>
+
+                <div class="total-section" id="totalSection" style="display: none;">
+                    <div>Total Amount:</div>
+                    <div class="total-amount">₹<span id="totalAmount">0.00</span></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select name="payment_method">
+                        <option value="Cash">Cash</option>
+                        <option value="Card">Card</option>
+                        <option value="UPI">UPI</option>
+                        <option value="Insurance">Insurance</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="submit-btn">Complete Sale</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let inventory = [];
+        let saleItems = [];
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Load inventory
+        async function loadInventory() {
+            try {
+                const response = await fetch('/api/pharmacy/inventory');
+                inventory = await response.json();
+                displayInventory(inventory);
+                populateMedicineSelect();
+            } catch (error) {
+                console.error('Error loading inventory:', error);
+            }
+        }
+
+        function displayInventory(data) {
+            const tbody = document.getElementById('inventoryTableBody');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px;">No medicines in inventory</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(item => {
+                const stockClass = item.stock_quantity <= item.reorder_level ? 'stock-low' : 'stock-ok';
+                return `
+                    <tr>
+                        <td><strong>${item.medicine_name}</strong></td>
+                        <td>${item.category || 'N/A'}</td>
+                        <td>${item.manufacturer || 'N/A'}</td>
+                        <td>₹${item.price}</td>
+                        <td class="${stockClass}">${item.stock_quantity}</td>
+                        <td>${item.status}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Search inventory
+        document.getElementById('searchInventory').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = inventory.filter(item => 
+                item.medicine_name.toLowerCase().includes(searchTerm) ||
+                (item.category && item.category.toLowerCase().includes(searchTerm))
+            );
+            displayInventory(filtered);
+        });
+
+        // Add medicine modal
+        function openAddMedicineModal() {
+            document.getElementById('addMedicineModal').style.display = 'block';
+        }
+
+        function closeAddMedicineModal() {
+            document.getElementById('addMedicineModal').style.display = 'none';
+            document.getElementById('addMedicineForm').reset();
+        }
+
+        document.getElementById('addMedicineForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/api/pharmacy/inventory', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Medicine added successfully!');
+                    closeAddMedicineModal();
+                    loadInventory();
+                } else {
+                    alert('Error adding medicine');
+                }
+            } catch (error) {
+                alert('Error adding medicine');
+                console.error(error);
+            }
+        });
+
+        // Sale modal
+        function openSaleModal() {
+            saleItems = [];
+            document.getElementById('saleModal').style.display = 'block';
+            updateSaleDisplay();
+        }
+
+        function closeSaleModal() {
+            document.getElementById('saleModal').style.display = 'none';
+            document.getElementById('saleForm').reset();
+            saleItems = [];
+        }
+
+        function populateMedicineSelect() {
+            const select = document.getElementById('medicineSelect');
+            select.innerHTML = '<option value="">-- Select Medicine --</option>' + 
+                inventory.filter(m => m.status === 'Available' && m.stock_quantity > 0)
+                    .map(m => `<option value="${m.medicine_id}">${m.medicine_name} - ₹${m.price} (Stock: ${m.stock_quantity})</option>`)
+                    .join('');
+        }
+
+        function addSaleItem() {
+            const medicineId = document.getElementById('medicineSelect').value;
+            const quantity = parseInt(document.getElementById('medicineQuantity').value);
+            
+            if (!medicineId) {
+                alert('Please select a medicine');
+                return;
+            }
+
+            const medicine = inventory.find(m => m.medicine_id == medicineId);
+            
+            if (quantity > medicine.stock_quantity) {
+                alert('Insufficient stock!');
+                return;
+            }
+
+            saleItems.push({
+                medicine_id: medicine.medicine_id,
+                medicine_name: medicine.medicine_name,
+                quantity: quantity,
+                price: medicine.price,
+                total: medicine.price * quantity
+            });
+
+            updateSaleDisplay();
+            document.getElementById('medicineSelect').value = '';
+            document.getElementById('medicineQuantity').value = '1';
+        }
+
+        function removeSaleItem(index) {
+            saleItems.splice(index, 1);
+            updateSaleDisplay();
+        }
+
+        function updateSaleDisplay() {
+            const container = document.getElementById('saleItems');
+            const totalSection = document.getElementById('totalSection');
+            
+            if (saleItems.length === 0) {
+                container.innerHTML = '';
+                totalSection.style.display = 'none';
+                return;
+            }
+
+            container.innerHTML = saleItems.map((item, index) => `
+                <div class="sale-item">
+                    <div>
+                        <strong>${item.medicine_name}</strong><br>
+                        ${item.quantity} × ₹${item.price} = ₹${item.total.toFixed(2)}
+                    </div>
+                    <button type="button" class="remove-btn" onclick="removeSaleItem(${index})">Remove</button>
+                </div>
+            `).join('');
+
+            const total = saleItems.reduce((sum, item) => sum + item.total, 0);
+            document.getElementById('totalAmount').textContent = total.toFixed(2);
+            totalSection.style.display = 'block';
+        }
+
+        document.getElementById('saleForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (saleItems.length === 0) {
+                alert('Please add at least one item');
+                return;
+            }
+
+            const patientId = document.getElementById('salePatientId').value;
+            const paymentMethod = document.querySelector('[name="payment_method"]').value;
+            const totalAmount = saleItems.reduce((sum, item) => sum + item.total, 0);
+
+            try {
+                const response = await fetch('/api/pharmacy/sales', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        patient_id: patientId,
+                        items: saleItems,
+                        total_amount: totalAmount,
+                        payment_method: paymentMethod
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Sale completed successfully!');
+                    closeSaleModal();
+                    loadInventory();
+                } else {
+                    alert('Error processing sale');
+                }
+            } catch (error) {
+                alert('Error processing sale');
+                console.error(error);
+            }
+        });
+
+        // Load data on page load
+        loadInventory();
+    </script>
+</body>
+</html>

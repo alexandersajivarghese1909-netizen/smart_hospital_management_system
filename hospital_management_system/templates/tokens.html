@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Management - Smart HMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            font-size: 22px;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 30px;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .display-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .tokens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .token-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s;
+        }
+
+        .token-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .token-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .token-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .token-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-waiting {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-called {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .patient-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .doctor-name {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .call-btn {
+            width: 100%;
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .call-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            margin: 100px auto;
+            border-radius: 12px;
+            padding: 30px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            background: white;
+            border-radius: 12px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>🎫 OPD Token Management</h1>
+        <div style="display: flex; gap: 10px;">
+            <a href="/token-display" target="_blank" class="display-btn">📺 Open Display</a>
+            <a href="/dashboard" class="back-btn">← Back</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="action-bar">
+            <h2>Today's Tokens</h2>
+            <button class="add-btn" onclick="openAddModal()">+ Generate New Token</button>
+        </div>
+
+        <div class="tokens-grid" id="tokensGrid">
+            <!-- Tokens will be loaded dynamically -->
+        </div>
+    </div>
+
+    <!-- Add Token Modal -->
+    <div id="addTokenModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Generate New Token</h2>
+                <button class="close-btn" onclick="closeAddModal()">&times;</button>
+            </div>
+            <form id="addTokenForm">
+                <div class="form-group">
+                    <label>Patient ID *</label>
+                    <input type="text" name="patient_id" placeholder="Enter Patient ID (e.g., PAT001)" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Doctor *</label>
+                    <select name="doctor_id" id="doctorSelect" required>
+                        <option value="">-- Select Doctor --</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="submit-btn">Generate Token</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let allTokens = [];
+        let doctors = [];
+
+        // Load doctors
+        async function loadDoctors() {
+            try {
+                const response = await fetch('/api/doctors');
+                doctors = await response.json();
+                
+                const select = document.getElementById('doctorSelect');
+                select.innerHTML = '<option value="">-- Select Doctor --</option>' + 
+                    doctors.map(doc => `<option value="${doc.user_id}">${doc.full_name} - ${doc.specialization}</option>`).join('');
+            } catch (error) {
+                console.error('Error loading doctors:', error);
+            }
+        }
+
+        // Load tokens
+        async function loadTokens() {
+            try {
+                const response = await fetch('/api/tokens');
+                allTokens = await response.json();
+                displayTokens();
+            } catch (error) {
+                console.error('Error loading tokens:', error);
+            }
+        }
+
+        function displayTokens() {
+            const grid = document.getElementById('tokensGrid');
+            
+            if (allTokens.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <h3>No tokens for today</h3>
+                        <p>Click "Generate New Token" to create the first token</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = allTokens.map(token => `
+                <div class="token-card">
+                    <div class="token-header">
+                        <div class="token-number">#${token.token_number}</div>
+                        <div class="token-status status-${token.status.toLowerCase()}">${token.status}</div>
+                    </div>
+                    <div class="patient-name">${token.first_name} ${token.last_name}</div>
+                    <div class="doctor-name">👨‍⚕️ Dr. ${token.doctor_name}</div>
+                    <button 
+                        class="call-btn" 
+                        onclick="callToken(${token.token_id})"
+                        ${token.status !== 'Waiting' ? 'disabled' : ''}>
+                        ${token.status === 'Waiting' ? '📢 Call Token' : token.status}
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Call token
+        async function callToken(tokenId) {
+            try {
+                const response = await fetch(`/api/tokens/${tokenId}/call`, {
+                    method: 'PUT'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    loadTokens();
+                } else {
+                    alert('Error calling token');
+                }
+            } catch (error) {
+                alert('Error calling token');
+                console.error(error);
+            }
+        }
+
+        // Modal functions
+        function openAddModal() {
+            document.getElementById('addTokenModal').style.display = 'block';
+        }
+
+        function closeAddModal() {
+            document.getElementById('addTokenModal').style.display = 'none';
+            document.getElementById('addTokenForm').reset();
+        }
+
+        // Add token form submission
+        document.getElementById('addTokenForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/api/tokens', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`Token generated successfully!\n\nToken Number: ${result.token_number}`);
+                    closeAddModal();
+                    loadTokens();
+                } else {
+                    alert('Error generating token');
+                }
+            } catch (error) {
+                alert('Error generating token');
+                console.error(error);
+            }
+        });
+
+        // Auto-refresh every 5 seconds
+        setInterval(loadTokens, 5000);
+
+        // Load data on page load
+        loadDoctors();
+        loadTokens();
+    </script>
+</body>
+</html>

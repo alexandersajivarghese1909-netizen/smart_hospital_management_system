@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Smart Hospital Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" type="img/png" href="hospital_management_system\icons\logo.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fefefe 0%, #9958df 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.58);
+            padding: 40px;
+            border-radius: 50px;
+            box-shadow: 0 20px 60px rgba(60, 0, 255, 0.523);
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            transition: all 400ms;
+        }
+
+        .login-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .demo-credentials {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(245, 245, 245, 0.8);
+            border-radius: 8px;
+        }
+
+        .demo-credentials h3 {
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .demo-item {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .demo-item strong {
+            color: #667eea;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .social-icon-container {
+            display: flex;
+            gap: 16px;
+            margin: 15px 0;
+            justify-content: center;
+        }
+
+        .social-icon-container a {
+            display: flex;
+            gap: 8px;
+            font-size: 20px;
+            text-decoration: none;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            justify-content: center;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 8px -2px rgba(0,0,0,0.2);
+            transition: all 400ms ease;
+            overflow: hidden;
+        }
+
+        .social-icon-container a:hover {
+            width: 138px;
+            padding: 0 12px;
+        }
+
+        .social-icon-container a .name {
+            font-size: 14px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .social-icon-container a:hover .name {
+            opacity: 1;
+        }
+
+        .social-icon-container a:nth-of-type(1) {
+            color: #0A66C2;
+        }
+        .social-icon-container a:nth-of-type(2) {
+            color: #e1306c;
+        }
+
+        #clock {
+            position: fixed;
+            top: 15px;
+            right: 10px;
+            color: #111;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            text-align: right;
+        }
+
+        #clock .time {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #555;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div id="clock">
+        <div class="time" id="time"></div>
+        <div class="date" id="date"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="logo">
+            <h1>🏥 Smart HMS</h1>
+            <p>Hospital Management System</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required placeholder="Enter your username" autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div style="position:relative;">
+                    <input type="password" id="password" name="password" required placeholder="Enter your password" autocomplete="current-password" style="padding-right:45px;">
+                    <i class="fa-solid fa-eye password-toggle" id="togglePassword"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                <span id="btnText">Login</span>
+                <span id="btnSpinner" style="display:none;">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                </span>
+            </button>
+        </form>
+
+        <div class="demo-credentials">
+            <h3>📝 Demo Login Credentials:</h3>
+            <div class="demo-item"><strong>Chairman:</strong> chairman / chairman123</div>
+            <div class="demo-item"><strong>Doctor:</strong> dr_cardio / doctor123</div>
+            <div class="demo-item"><strong>Pharmacist:</strong> pharmacist / pharma123</div>
+            <div class="demo-item"><strong>Lab Staff:</strong> labstaff / lab123</div>
+            <div class="demo-item"><strong>Reception:</strong> reception / reception123</div>
+        </div>
+
+        <div class="footer">
+            Created by Alexander Saji Varghese<br>
+            © 2026 Smart Hospital Management System<br>
+            Contact Me On:
+        </div>
+
+        <div class="social-icon-container">
+            <a href="https://www.linkedin.com/in/alexander-saji-varghese-450b26321" target="_blank" rel="noopener">
+                <div class="icon">
+                    <i class="fa-brands fa-linkedin"></i>
+                </div>
+                <div class="name">LinkedIn</div>
+            </a>
+
+            <a href="https://www.instagram.com/alexander" target="_blank" rel="noopener">
+                <div class="icon">
+                    <i class="fa-brands fa-instagram"></i>
+                </div>
+                <div class="name">Instagram</div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // ==================== CLOCK ====================
+        function updateClock() {
+            let now = new Date();
+            let hours = now.getHours();
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+
+            let minutes = now.getMinutes().toString().padStart(2, '0');
+            let seconds = now.getSeconds().toString().padStart(2, '0');
+            let timeString = hours + ":" + minutes + ":" + seconds + " " + ampm;
+
+            let days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+            let dateString = days[now.getDay()] + ", " + now.getDate() + "/" + (now.getMonth()+1) + "/" + now.getFullYear();
+
+            document.getElementById("time").innerText = timeString;
+            document.getElementById("date").innerText = dateString;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // ==================== PASSWORD TOGGLE ====================
+        const togglePassword = document.getElementById("togglePassword");
+        const passwordInput = document.getElementById("password");
+
+        togglePassword.addEventListener("click", function () {
+            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+            passwordInput.setAttribute("type", type);
+            this.classList.toggle("fa-eye");
+            this.classList.toggle("fa-eye-slash");
+        });
+
+        // ==================== MESSAGES ====================
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+            
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        function resetLoginButton() {
+            const loginBtn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+            
+            btnText.textContent = "Login";
+            btnSpinner.style.display = "none";
+            loginBtn.disabled = false;
+        }
+
+        // ==================== LOGIN FORM ====================
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            const loginBtn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+
+            // Validation
+            if (!username || !password) {
+                showError('Please fill in all fields');
+                return;
+            }
+
+            // Disable button and show loading
+            btnText.textContent = "Logging in...";
+            btnSpinner.style.display = "inline-block";
+            loginBtn.disabled = true;
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess('✓ Login successful! Redirecting...');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 1000);
+                } else {
+                    showError(data.message || '✗ Invalid credentials');
+                    resetLoginButton();
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('✗ Connection error. Please try again.');
+                resetLoginButton();
+            }
+        });
+    </script>
+</body>
+</html>

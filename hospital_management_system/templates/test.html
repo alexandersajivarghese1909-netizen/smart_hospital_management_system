@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Clock</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 32px;
+            text-align: center;
+            margin-top: 100px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="clock"></div>
+
+<script>
+function updateClock() {
+    let now = new Date();
+
+    let hours = now.getHours();
+    let ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+
+    let minutes = now.getMinutes();
+    let seconds = now.getSeconds();
+
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+
+    let timeString = hours + " " + ampm + " : " + minutes + " : " + seconds;
+
+    document.getElementById("clock").innerHTML = timeString;
+}
+
+// Run once immediately
+updateClock();
+
+// Update every 1 second
+setInterval(updateClock, 1000);
+</script>
+
+</body>
+</html>

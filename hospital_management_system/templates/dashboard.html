@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Smart HMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar h1 {
+            font-size: 24px;
+        }
+
+        .navbar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .menu-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .menu-card .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .menu-card h3 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .menu-card p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>🏥 Smart Hospital Management System</h1>
+        <div class="user-info">
+            <span id="userName">Welcome</span>
+            <span id="userRole" style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px;">Role</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2 class="section-title">Dashboard Statistics</h2>
+        <div class="stats-grid" id="statsGrid">
+            <!-- Stats will be loaded dynamically -->
+        </div>
+
+        <h2 class="section-title">Quick Access Menu</h2>
+        <div class="menu-grid" id="menuGrid">
+            <!-- Menu items will be loaded based on role -->
+        </div>
+    </div>
+
+    <script>
+        // Load user info
+        const userRole = "{{ role }}";
+        document.getElementById('userRole').textContent = userRole;
+
+        // Load dashboard stats
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/dashboard/stats');
+                const stats = await response.json();
+                
+                const statsGrid = document.getElementById('statsGrid');
+                statsGrid.innerHTML = `
+                    <div class="stat-card">
+                        <h3>Total Patients</h3>
+                        <div class="number">${stats.total_patients || 0}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Today's Appointments</h3>
+                        <div class="number">${stats.todays_appointments || 0}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Tokens</h3>
+                        <div class="number">${stats.active_tokens || 0}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Pending Reports</h3>
+                        <div class="number">${stats.pending_reports || 0}</div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Load menu based on role
+        function loadMenu() {
+            const menuGrid = document.getElementById('menuGrid');
+            const allMenus = {
+                'Chairman': [
+                    { icon: '👥', title: 'Patients', desc: 'Manage patient records', link: '/patients' },
+                    { icon: '📅', title: 'Appointments', desc: 'View all appointments', link: '/appointments' },
+                    { icon: '🎫', title: 'Tokens', desc: 'OPD token system', link: '/tokens' },
+                    { icon: '💊', title: 'Pharmacy', desc: 'Inventory & sales', link: '/pharmacy' },
+                    { icon: '🔬', title: 'Laboratory', desc: 'Lab tests & reports', link: '/laboratory' },
+                    { icon: '💰', title: 'Billing', desc: 'Patient billing', link: '/billing' }
+                ],
+                'Manager': [
+                    { icon: '👥', title: 'Patients', desc: 'Manage patient records', link: '/patients' },
+                    { icon: '📅', title: 'Appointments', desc: 'View appointments', link: '/appointments' },
+                    { icon: '🎫', title: 'Tokens', desc: 'Token management', link: '/tokens' },
+                    { icon: '💊', title: 'Pharmacy', desc: 'Pharmacy management', link: '/pharmacy' },
+                    { icon: '💰', title: 'Billing', desc: 'Billing system', link: '/billing' }
+                ],
+                'Admin': [
+                    { icon: '👥', title: 'Patients', desc: 'Patient management', link: '/patients' },
+                    { icon: '📅', title: 'Appointments', desc: 'Appointments', link: '/appointments' },
+                    { icon: '💊', title: 'Pharmacy', desc: 'Pharmacy', link: '/pharmacy' },
+                    { icon: '🔬', title: 'Laboratory', desc: 'Laboratory', link: '/laboratory' }
+                ],
+                'Doctor': [
+                    { icon: '📅', title: 'Appointments', desc: 'My appointments', link: '/appointments' },
+                    { icon: '🎫', title: 'Tokens', desc: 'Patient tokens', link: '/tokens' },
+                    { icon: '📝', title: 'Prescriptions', desc: 'Write prescriptions', link: '/prescriptions' },
+                    { icon: '🔬', title: 'Lab Tests', desc: 'Request lab tests', link: '/laboratory' },
+                    { icon: '👥', title: 'Patients', desc: 'View patients', link: '/patients' }
+                ],
+                'Lab Staff': [
+                    { icon: '🔬', title: 'Laboratory', desc: 'Manage lab reports', link: '/laboratory' },
+                    { icon: '👥', title: 'Patients', desc: 'View patients', link: '/patients' }
+                ],
+                'Pharmacist': [
+                    { icon: '💊', title: 'Pharmacy', desc: 'Dispense medicines', link: '/pharmacy' },
+                    { icon: '📦', title: 'Inventory', desc: 'Stock management', link: '/pharmacy' },
+                    { icon: '👥', title: 'Patients', desc: 'View patients', link: '/patients' }
+                ],
+                'Reception': [
+                    { icon: '👥', title: 'Patients', desc: 'Register patients', link: '/patients' },
+                    { icon: '📅', title: 'Appointments', desc: 'Book appointments', link: '/appointments' },
+                    { icon: '🎫', title: 'Tokens', desc: 'Generate tokens', link: '/tokens' },
+                    { icon: '💰', title: 'Billing', desc: 'Patient billing', link: '/billing' }
+                ],
+                'Patient': [
+                    { icon: '🏠', title: 'My Portal', desc: 'View my records', link: '/patient-portal' },
+                    { icon: '📅', title: 'Appointments', desc: 'My appointments', link: '/patient-portal' },
+                    { icon: '📝', title: 'Prescriptions', desc: 'My prescriptions', link: '/patient-portal' },
+                    { icon: '🔬', title: 'Reports', desc: 'Lab reports', link: '/patient-portal' }
+                ]
+            };
+
+            const menus = allMenus[userRole] || [];
+            menuGrid.innerHTML = menus.map(menu => `
+                <a href="${menu.link}" class="menu-card">
+                    <div class="icon">${menu.icon}</div>
+                    <h3>${menu.title}</h3>
+                    <p>${menu.desc}</p>
+                </a>
+            `).join('');
+        }
+
+        function logout() {
+            window.location.href = '/logout';
+        }
+
+        // Load data on page load
+        loadStats();
+        loadMenu();
+    </script>
+</body>
+</html>

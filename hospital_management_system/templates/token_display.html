@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPD Token Display</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            overflow: hidden;
+        }
+
+        .header {
+            background: rgba(0,0,0,0.3);
+            padding: 20px 40px;
+            text-align: center;
+            border-bottom: 3px solid #ffd700;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .datetime {
+            font-size: 24px;
+            color: #ffd700;
+        }
+
+        .main-display {
+            display: flex;
+            height: calc(100vh - 150px);
+            padding: 40px;
+            gap: 40px;
+        }
+
+        .current-token {
+            flex: 2;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+
+        .current-label {
+            font-size: 36px;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .current-number {
+            font-size: 180px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(255,255,255,0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .patient-info {
+            font-size: 36px;
+            margin-top: 20px;
+            color: #ffd700;
+        }
+
+        .doctor-name {
+            font-size: 28px;
+            margin-top: 10px;
+            color: #ccc;
+        }
+
+        .upcoming-tokens {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+
+        .upcoming-header {
+            font-size: 32px;
+            color: #ffd700;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .token-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .token-item {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .token-num {
+            font-size: 42px;
+            font-weight: bold;
+        }
+
+        .token-patient {
+            font-size: 22px;
+            color: #ddd;
+        }
+
+        .no-token {
+            text-align: center;
+            padding: 100px 40px;
+            font-size: 48px;
+            color: #ffd700;
+        }
+
+        .footer {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            text-align: center;
+            font-size: 20px;
+            border-top: 3px solid #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏥 OPD Token Display System</h1>
+        <div class="datetime" id="datetime"></div>
+    </div>
+
+    <div class="main-display">
+        <div class="current-token" id="currentToken">
+            <div class="current-label">NOW CALLING</div>
+            <div class="current-number" id="currentNumber">--</div>
+            <div class="patient-info" id="patientInfo">Waiting for next patient...</div>
+            <div class="doctor-name" id="doctorName"></div>
+        </div>
+
+        <div class="upcoming-tokens">
+            <div class="upcoming-header">⏳ UPCOMING TOKENS</div>
+            <div class="token-list" id="upcomingList">
+                <!-- Will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Smart Hospital Management System | Please wait for your token number
+    </div>
+
+    <script>
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('datetime').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Load token data
+        async function loadTokens() {
+            try {
+                const response = await fetch('/api/tokens');
+                const tokens = await response.json();
+                
+                // Find current token (Called status)
+                const currentToken = tokens
+                    .filter(t => t.status === 'Called')
+                    .sort((a, b) => new Date(b.called_at) - new Date(a.called_at))[0];
+
+                
+                // Get waiting tokens
+                const waitingTokens = tokens
+                    .filter(t => t.status === 'Waiting')
+                    .sort((a, b) => a.token_number - b.token_number)
+                    .slice(0, 5);
+
+                
+                // Update current token display
+                if (currentToken) {
+                    document.getElementById('currentNumber').textContent = currentToken.token_number;
+                    document.getElementById('patientInfo').textContent = `${currentToken.first_name} ${currentToken.last_name}`;
+                    document.getElementById('doctorName').textContent = `Dr. ${currentToken.doctor_name}`;
+                } else {
+                    document.getElementById('currentNumber').textContent = '--';
+                    document.getElementById('patientInfo').textContent = 'Waiting for next patient...';
+                    document.getElementById('doctorName').textContent = '';
+                }
+                
+                // Update upcoming tokens
+                const upcomingList = document.getElementById('upcomingList');
+                if (waitingTokens.length > 0) {
+                    upcomingList.innerHTML = waitingTokens.map(token => `
+                        <div class="token-item">
+                            <div class="token-num">${token.token_number}</div>
+                            <div class="token-patient">${token.first_name} ${token.last_name}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    upcomingList.innerHTML = '<div style="text-align: center; padding: 40px; font-size: 24px;">No tokens waiting</div>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading tokens:', error);
+            }
+        }
+
+        // Update every 3 seconds
+        setInterval(updateDateTime, 1000);
+        setInterval(loadTokens, 3000);
+
+        // Initial load
+        updateDateTime();
+        loadTokens();
+    </script>
+</body>
+</html>
